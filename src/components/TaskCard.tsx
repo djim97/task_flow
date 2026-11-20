@@ -1,10 +1,13 @@
-import type { Task } from '../api/types'
+import type { ChangeEvent } from 'react'
+import type { Task, TaskStatus } from '../api/types'
 import { formatDueDate } from '../lib/date'
-import { isOverdue } from '../lib/tasks'
+import { isOverdue, isTaskStatus, STATUS_LABELS, STATUS_ORDER } from '../lib/tasks'
 import { PriorityBadge } from './PriorityBadge'
 
 interface TaskCardProps {
   task: Task
+  onStatusChange: (id: number, status: TaskStatus) => void
+  onDelete: (id: number) => void
 }
 
 function CalendarIcon() {
@@ -24,16 +27,39 @@ function CalendarIcon() {
   )
 }
 
-export function TaskCard({ task }: TaskCardProps) {
+function TrashIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      className="size-3.5"
+      aria-hidden="true"
+    >
+      <path d="M2.5 4h11M6 4V2.5h4V4M4 4l.6 9a1 1 0 0 0 1 .9h4.8a1 1 0 0 0 1-.9L12 4M6.5 7v4M9.5 7v4" />
+    </svg>
+  )
+}
+
+export function TaskCard({ task, onStatusChange, onDelete }: TaskCardProps) {
   // Valeur dérivée : calculée au rendu, jamais stockée dans un état.
   const overdue = isOverdue(task)
+
+  function handleStatusChange(event: ChangeEvent<HTMLSelectElement>) {
+    const value = event.target.value
+    if (isTaskStatus(value)) {
+      onStatusChange(task.id, value)
+    }
+  }
 
   return (
     <li className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:border-slate-300 hover:shadow-md">
       <div className="flex items-start justify-between gap-2">
         <PriorityBadge priority={task.priority} />
         {overdue && (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700 ring-1 ring-inset ring-red-200">
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700 ring-1 ring-red-200 ring-inset">
             <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
             En retard
           </span>
@@ -50,19 +76,43 @@ export function TaskCard({ task }: TaskCardProps) {
         </p>
       )}
 
-      <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-2.5">
         {task.dueDate === null ? (
-          <span className="text-slate-400">Sans échéance</span>
+          <span className="text-xs text-slate-400">Sans échéance</span>
         ) : (
           <span
-            className={
-              overdue ? 'inline-flex items-center gap-1.5 font-medium text-red-600' : 'inline-flex items-center gap-1.5'
-            }
+            className={`inline-flex items-center gap-1.5 text-xs ${
+              overdue ? 'font-medium text-red-600' : 'text-slate-500'
+            }`}
           >
             <CalendarIcon />
             {formatDueDate(task.dueDate)}
           </span>
         )}
+
+        <div className="flex shrink-0 items-center gap-1">
+          <select
+            value={task.status}
+            onChange={handleStatusChange}
+            aria-label={`Statut de « ${task.title} »`}
+            className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 text-[11px] font-medium text-slate-600 transition hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          >
+            {STATUS_ORDER.map((status) => (
+              <option key={status} value={status}>
+                {STATUS_LABELS[status]}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            onClick={() => onDelete(task.id)}
+            aria-label={`Supprimer « ${task.title} »`}
+            className="grid size-7 place-items-center rounded-md text-slate-400 transition hover:bg-red-50 hover:text-red-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+          >
+            <TrashIcon />
+          </button>
+        </div>
       </div>
     </li>
   )

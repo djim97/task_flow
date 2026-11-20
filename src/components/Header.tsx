@@ -19,7 +19,7 @@ export function Header({ projectName }: HeaderProps) {
         </div>
 
         <span className="ml-auto rounded-full bg-slate-800 px-2.5 py-1 text-[11px] font-medium text-slate-300 ring-1 ring-slate-700 ring-inset">
-          Maquette statique
+          Données locales
         </span>
       </div>
     </header>
