@@ -14,7 +14,10 @@ export interface Task {
     createdAt: string;
  }
  
- export interface User {   
+ /** Données du formulaire ; Board complète id, statut, projet et createdAt. */
+export type TaskDraft = Pick<Task, 'title' | 'description' | 'priority' | 'dueDate'>
+
+export interface User {   
     id: number;   
     name: string;   
     email: string;   
