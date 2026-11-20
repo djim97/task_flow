@@ -62,17 +62,20 @@ src/
     types.ts        # types partagés (Task, TaskStatus, Priority...)
   components/
     Header.tsx      # en-tête de l'application
-    Board.tsx       # répartit les tâches dans les trois colonnes
+    Board.tsx       # état local, recherche et handlers
     Column.tsx      # colonne générique, cartes passées en children
-    TaskCard.tsx    # carte d'une tâche
+    TaskCard.tsx    # carte d'une tâche + actions statut/suppression
+    TaskForm.tsx    # formulaire contrôlé de création
+    TaskStats.tsx   # statistiques dérivées
     PriorityBadge.tsx
   data/
     mockTasks.ts    # données de démonstration (jalons 1 et 2)
   lib/
     date.ts         # formatage des dates ISO
-    tasks.ts        # libellés, filtre par statut, règle « en retard »
+    tasks.ts        # libellés, filtres, retard, statistiques
 docs/
   j1-board.png      # capture du jalon 1
+  j2-board.png      # capture du jalon 2
 ```
 
 ## Jalons
@@ -80,7 +83,7 @@ docs/
 | Tag | Objet | État |
 | --- | --- | --- |
 | j1 | Maquette statique typée | livré (tag `j1`) |
-| j2 | Board interactif local | à venir |
+| j2 | Board interactif local | livré (tag `j2`) |
 | j3 | Branchement sur l'API | à venir |
 | j4 | Navigation multi-pages | à venir |
 | j5 | Authentification et état global | à venir |
@@ -91,7 +94,7 @@ docs/
 Chaque jalon est livré par un tag Git :
 
 ```bash
-git tag j1
+git tag j2
 git push --tags
 ```
 
@@ -112,6 +115,22 @@ Critères de validation :
 - [x] Props typées par interface, `key = id`
 - [x] Capture d'écran dans ce README
 
+### J2 : board interactif local
+
+Objectif : rendre le board interactif avec un état local immuable.
+
+- [x] Tâches dans un `useState<Task[]>` du `Board` (état remonté)
+- [x] `TaskForm` contrôlé : titre ≥ 3 caractères, priorité, description, échéance non passée
+- [x] Changement de statut et suppression (après confirmation)
+- [x] `TaskStats` : total, terminées, % d'avancement, en retard
+- [x] Recherche par titre, insensible à la casse
+
+Critères de validation :
+
+- [x] Aucune mutation d'état (`map`, `filter`, spread uniquement)
+- [x] Statistiques et liste filtrée dérivées (aucun `useState` ni `useEffect` pour elles)
+- [x] Callbacks nommés `onCreate`, `onStatusChange`, `onDelete`
+
 ## Captures d'écran
 
 ### J1 — maquette statique
@@ -120,6 +139,13 @@ Critères de validation :
 
 Les compteurs (4 / 2 / 2), le badge « En retard » des tâches non terminées
 et l'échéance en rouge sont calculés au rendu à partir de `mockTasks`.
+
+### J2 — board interactif
+
+![Board TaskFlow Teams au jalon 2](docs/j2-board.png)
+
+Le même board, avec en plus : formulaire de création, statistiques dérivées
+(8 tâches, 2 terminées, 25 %, 3 en retard), recherche et actions par carte.
 
 ## Modèle de données
 
@@ -144,3 +170,14 @@ Journal des décisions d'architecture, à remplir au fil des séances.
 
 - J1 : données mockées dans `src/data`, aucun état. L'état sera remonté dans
   `Board` au jalon 2.
+- J2 : `Board` est la seule source de vérité (`useState<Task[]>`). Toutes les
+  mises à jour passent par la forme fonctionnelle `setTasks((current) => ...)` :
+  tableau immuable, aucun `push` ni mutation en place.
+- J2 : les statistiques (`computeStats`) et la liste recherchée (`visibleTasks`)
+  sont calculées au rendu. Aucun état ni effet pour des valeurs dérivées.
+- J2 : la confirmation de suppression vit dans `handleDelete` (Board), pas dans
+  `TaskCard` : la carte reste un composant de présentation, testable au J8.
+- J2 : la recherche filtre les colonnes mais pas les statistiques : celles-ci
+  décrivent tout le projet, pas le résultat d'une recherche.
+- J2 : les gardes `isTaskStatus` / `isPriority` remplacent les casts `as` sur
+  les valeurs des `<select>`.
