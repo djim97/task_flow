@@ -60,21 +60,26 @@ Scripts à ajouter à partir du jalon 3 : `api`, `api:auth`, `dev:all`, `test`,
 src/
   api/
     types.ts        # types partagés (Task, TaskStatus, Priority...)
+  components/
+    Header.tsx      # en-tête de l'application
+    Board.tsx       # répartit les tâches dans les trois colonnes
+    Column.tsx      # colonne générique, cartes passées en children
+    TaskCard.tsx    # carte d'une tâche
+    PriorityBadge.tsx
   data/
     mockTasks.ts    # données de démonstration (jalons 1 et 2)
-  components/
-    Header.tsx
-    Board.tsx
-    Column.tsx
-    TaskCard.tsx
-    PriorityBadge.tsx
+  lib/
+    date.ts         # formatage des dates ISO
+    tasks.ts        # libellés, filtre par statut, règle « en retard »
+docs/
+  j1-board.png      # capture du jalon 1
 ```
 
 ## Jalons
 
 | Tag | Objet | État |
 | --- | --- | --- |
-| j1 | Maquette statique typée | en cours |
+| j1 | Maquette statique typée | livré (tag `j1`) |
 | j2 | Board interactif local | à venir |
 | j3 | Branchement sur l'API | à venir |
 | j4 | Navigation multi-pages | à venir |
@@ -94,22 +99,27 @@ git push --tags
 
 Objectif : poser les composants de base, sans aucun état ni interaction.
 
-- [ ] Projet Vite react-ts et Tailwind 4, premier commit poussé
-- [ ] `src/api/types.ts`
-- [ ] `src/data/mockTasks.ts` (8 tâches réparties sur les 3 statuts)
-- [ ] Composants Header, Board, Column (avec `children`), TaskCard, PriorityBadge
-- [ ] Chaque colonne filtre par statut, affiche son compteur et « Aucune tâche » si vide
-- [ ] Badge « En retard » si `dueDate` est dépassée et la tâche non terminée
+- [x] Projet Vite react-ts et Tailwind 4, premier commit poussé
+- [x] `src/api/types.ts`
+- [x] `src/data/mockTasks.ts` (8 tâches réparties sur les 3 statuts)
+- [x] Composants Header, Board, Column (avec `children`), TaskCard, PriorityBadge
+- [x] Chaque colonne filtre par statut, affiche son compteur et « Aucune tâche » si vide
+- [x] Badge « En retard » si `dueDate` est dépassée et la tâche non terminée
 
 Critères de validation :
 
-- [ ] `npm run build` sans erreur, aucun `any`
-- [ ] Props typées par interface, `key = id`
-- [ ] Capture d'écran dans ce README
+- [x] `npm run build` sans erreur, aucun `any`
+- [x] Props typées par interface, `key = id`
+- [x] Capture d'écran dans ce README
 
 ## Captures d'écran
 
-À ajouter.
+### J1 — maquette statique
+
+![Board TaskFlow Teams au jalon 1](docs/j1-board.png)
+
+Les compteurs (4 / 2 / 2), le badge « En retard » des tâches non terminées
+et l'échéance en rouge sont calculés au rendu à partir de `mockTasks`.
 
 ## Modèle de données
 
